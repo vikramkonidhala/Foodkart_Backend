@@ -28,6 +28,6 @@ app.listen(port, () => {
   console.log(`Server started running successfully on port: ${port}`);
 });
 
-app.use("/home", (req, res) => {
+app.use("/", (req, res) => {
   res.send("<h1>Welcome to FoodKart</h1>");
 });
