@@ -1,6 +1,8 @@
 const Firm = require("../models/Firm");
+const Product = require("../models/Product");
 const Vendor = require("../models/Vendor");
 const multer = require("multer");
+const path = require("path");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -42,7 +44,9 @@ const addFirm = async (req, res) => {
 
     await vendor.save();
 
-    return res.status(200).json({ message: "Firm added successfully" });
+    return res
+      .status(200)
+      .json({ message: "Firm added successfully", firmId: savedFirm._id });
   } catch (error) {
     return res.status(500).json({ message: "Internal server error" });
   }
@@ -57,6 +61,16 @@ const deleteFirmById = async (req, res) => {
     if (!deletedFirm) {
       return res.status(404).json({ message: "Firm not found" });
     }
+
+    const vendor = await Vendor.findById(deletedFirm.vendor);
+
+    if (vendor) {
+      vendor.firm = vendor.firm.filter(
+        (firmId) => firmId.toString() !== deletedFirm._id.toString()
+      );
+      await vendor.save();
+    }
+    await Product.deleteMany({ firm: firmId });
 
     return res.status(200).json({ message: "Firm deleted successfully" });
   } catch (error) {

@@ -10,18 +10,17 @@ const productSchema = new mongoose.Schema({
     required: true,
   },
   category: {
-    type: [
-      {
-        type: String,
-        enum: ["veg", "non-veg"],
-      },
-    ],
+    type: String,
+    required: true,
+    enum: ["veg", "non-veg"],
   },
   image: {
     type: String,
+    required: true,
   },
   bestSeller: {
     type: String,
+    required: true,
   },
   description: {
     type: String,

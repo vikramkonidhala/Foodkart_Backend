@@ -8,12 +8,13 @@ const firmSchema = new mongoose.Schema({
   },
   area: {
     type: String,
-    unique: true,
+    required: true,
   },
   category: {
     type: [
       {
         type: String,
+        required: true,
         enum: ["veg", "non-veg"],
       },
     ],
@@ -22,6 +23,7 @@ const firmSchema = new mongoose.Schema({
     type: [
       {
         type: String,
+        required: true,
         enum: ["south-indian", "north-indian", "chinese", "bakery"],
       },
     ],
@@ -31,6 +33,7 @@ const firmSchema = new mongoose.Schema({
   },
   image: {
     type: String,
+    required: true,
   },
   vendor: [
     {

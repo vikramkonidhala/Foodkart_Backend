@@ -45,7 +45,9 @@ const vendorLogin = async (req, res) => {
 
     const token = jwt.sign({ id: vendor._id }, secretKey, { expiresIn: "1d" });
 
-    return res.status(200).json({ message: "Vendor Login Success", token });
+    return res
+      .status(200)
+      .json({ message: "Vendor Login Success", token, id: vendor._id });
   } catch (error) {
     return res.status(500).json({ message: "Internal Server Error" });
   }
@@ -63,12 +65,18 @@ const getAllVendors = async (req, res) => {
 const getVendorById = async (req, res) => {
   const id = req.params.id;
   try {
-    const vendor = await Vendor.findById(id).populate('firm');
+    const vendor = await Vendor.findById(id).populate("firm");
     if (!vendor) {
       return res.status(404).json({ message: "Vendor not found" });
     }
-    return res.status(200).json({vendor});
+    const vendorData = {
+      userId: vendor._id,
+      username: vendor.username,
+      email: vendor.email,
+      firm: vendor.firm[0],
+    };
+    return res.status(200).json({ vendor: vendorData });
   } catch (error) {}
 };
 
-module.exports = { vendorRegister, vendorLogin, getAllVendors , getVendorById};
+module.exports = { vendorRegister, vendorLogin, getAllVendors, getVendorById };
