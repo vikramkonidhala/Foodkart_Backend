@@ -3,6 +3,7 @@ const Product = require("../models/Product");
 const Vendor = require("../models/Vendor");
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -62,6 +63,15 @@ const deleteFirmById = async (req, res) => {
       return res.status(404).json({ message: "Firm not found" });
     }
 
+    const imagePath = path.join(__dirname, "../uploads", deletedFirm.image);
+    fs.rm(imagePath, { force: true }, (err) => {
+      if (err) {
+        console.error("Error while deleting file:", err);
+      } else {
+        console.log("File deleted successfully!");
+      }
+    });
+
     const vendor = await Vendor.findById(deletedFirm.vendor);
 
     if (vendor) {
@@ -69,6 +79,19 @@ const deleteFirmById = async (req, res) => {
         (firmId) => firmId.toString() !== deletedFirm._id.toString()
       );
       await vendor.save();
+    }
+    const products = await Product.find({ firm: firmId });
+    if (products) {
+      products.forEach((product) => {
+        const productImagePath = path.join(__dirname, "../uploads", product.image);
+        fs.rm(productImagePath, { force: true }, (err) => {
+          if (err) {
+            console.error("Error while deleting file:", err);
+          } else {
+            console.log("File deleted successfully!");
+          }
+        });
+      });
     }
     await Product.deleteMany({ firm: firmId });
 

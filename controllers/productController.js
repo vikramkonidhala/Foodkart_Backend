@@ -2,6 +2,7 @@ const Product = require("../models/Product");
 const Firm = require("../models/Firm");
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -80,11 +81,20 @@ const deleteProductById = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
+    const imagePath = path.join(__dirname, "../uploads", deletedProduct.image);
+    fs.rm(imagePath, { force: true }, (err) => {
+      if (err) {
+        console.error("Error while deleting file:", err);
+      } else {
+        console.log("File deleted successfully!");
+      }
+    });
+
     const firm = await Firm.findById(deletedProduct.firm);
 
     if (firm) {
       firm.products = firm.products.filter(
-      (productId) => productId.toString() !== deletedProduct._id.toString()
+        (productId) => productId.toString() !== deletedProduct._id.toString()
       );
       await firm.save();
     }
