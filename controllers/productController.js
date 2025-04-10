@@ -82,7 +82,7 @@ const deleteProductById = async (req, res) => {
     }
 
     const imagePath = path.join(__dirname, "../uploads", deletedProduct.image);
-    fs.rm(imagePath, { force: true }, (err) => {
+    fs.unlink(imagePath, (err) => {
       if (err) {
         console.error("Error while deleting file:", err);
       } else {

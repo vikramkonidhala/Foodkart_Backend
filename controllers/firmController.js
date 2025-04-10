@@ -64,7 +64,7 @@ const deleteFirmById = async (req, res) => {
     }
 
     const imagePath = path.join(__dirname, "../uploads", deletedFirm.image);
-    fs.rm(imagePath, { force: true }, (err) => {
+    fs.unlink(imagePath, (err) => {
       if (err) {
         console.error("Error while deleting file:", err);
       } else {
@@ -88,7 +88,7 @@ const deleteFirmById = async (req, res) => {
           "../uploads",
           product.image
         );
-        fs.rm(productImagePath, { force: true }, (err) => {
+        fs.unlink(productImagePath, (err) => {
           if (err) {
             console.error("Error while deleting file:", err);
           } else {
