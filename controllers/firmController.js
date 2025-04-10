@@ -7,7 +7,7 @@ const fs = require("fs");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "../uploads/");
+    cb(null, "/uploads/");
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
@@ -83,7 +83,11 @@ const deleteFirmById = async (req, res) => {
     const products = await Product.find({ firm: firmId });
     if (products) {
       products.forEach((product) => {
-        const productImagePath = path.join(__dirname, "../uploads", product.image);
+        const productImagePath = path.join(
+          __dirname,
+          "../uploads",
+          product.image
+        );
         fs.rm(productImagePath, { force: true }, (err) => {
           if (err) {
             console.error("Error while deleting file:", err);
