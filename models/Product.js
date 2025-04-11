@@ -18,6 +18,7 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  imagePublicId: { type: String },
   bestSeller: {
     type: String,
     required: true,

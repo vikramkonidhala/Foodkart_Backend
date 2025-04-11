@@ -2,25 +2,28 @@ const Product = require("../models/Product");
 const Firm = require("../models/Firm");
 const multer = require("multer");
 const path = require("path");
-const fs = require("fs");
+const {
+  uploadImageToCloudinary,
+  deleteImageFromCloudinary,
+} = require("../cloudinaryService");
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "./uploads/");
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
+  destination: (req, file, cb) => cb(null, "uploads/"),
+  filename: (req, file, cb) =>
+    cb(null, `${Date.now()}${path.extname(file.originalname)}`),
 });
 
-const upload = multer({
-  storage: storage,
-});
+const upload = multer({ storage: storage });
 
 const addProduct = async (req, res) => {
   try {
     const { productName, price, category, bestSeller, description } = req.body;
-    const image = req.file ? req.file.filename : undefined;
+
+    let imageDetails;
+    if (req.file) {
+      const filePath = req.file.path;
+      imageDetails = await uploadImageToCloudinary(filePath);
+    }
 
     const firmId = req.params.firmId;
 
@@ -36,7 +39,8 @@ const addProduct = async (req, res) => {
       category,
       bestSeller,
       description,
-      image,
+      image: imageDetails ? imageDetails.url : undefined,
+      imagePublicId: imageDetails ? imageDetails.publicId : undefined,
       firm: firm._id,
     });
 
@@ -81,14 +85,9 @@ const deleteProductById = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    const imagePath = path.join(__dirname, "../uploads", deletedProduct.image);
-    fs.unlink(imagePath, (err) => {
-      if (err) {
-        console.error("Error while deleting file:", err);
-      } else {
-        console.log("File deleted successfully!");
-      }
-    });
+    if (deletedProduct.imagePublicId) {
+      await deleteImageFromCloudinary(deletedProduct.imagePublicId);
+    }
 
     const firm = await Firm.findById(deletedProduct.firm);
 

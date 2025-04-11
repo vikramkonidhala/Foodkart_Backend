@@ -6,6 +6,13 @@ const vendorRoutes = require("./routes/vendorRoutes");
 const firmRoutes = require("./routes/firmRoutes");
 const productRoutes = require("./routes/productRoutes");
 const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
+
+const uploadsDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true }); // Create directory if it doesn’t exist
+}
 
 const app = express();
 
@@ -21,7 +28,6 @@ app.use(bodyparser.json());
 app.use("/vendor", vendorRoutes);
 app.use("/firm", firmRoutes);
 app.use("/product", productRoutes);
-app.use("/uploads", express.static("uploads"));
 
 const port = process.env.PORT || 4000;
 

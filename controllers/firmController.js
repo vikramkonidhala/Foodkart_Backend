@@ -3,25 +3,28 @@ const Product = require("../models/Product");
 const Vendor = require("../models/Vendor");
 const multer = require("multer");
 const path = require("path");
-const fs = require("fs");
+const {
+  uploadImageToCloudinary,
+  deleteImageFromCloudinary,
+} = require("../cloudinaryService");
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "./uploads/");
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
+  destination: (req, file, cb) => cb(null, "uploads/"),
+  filename: (req, file, cb) =>
+    cb(null, `${Date.now()}${path.extname(file.originalname)}`),
 });
 
-const upload = multer({
-  storage: storage,
-});
+const upload = multer({ storage: storage });
 
 const addFirm = async (req, res) => {
   try {
     const { firmName, area, category, region, offer } = req.body;
-    const image = req.file ? req.file.filename : undefined;
+
+    let imageDetails;
+    if (req.file) {
+      const filePath = req.file.path;
+      imageDetails = await uploadImageToCloudinary(filePath);
+    }
 
     const vendor = await Vendor.findById(req.vendorId);
 
@@ -35,7 +38,8 @@ const addFirm = async (req, res) => {
       category,
       region,
       offer,
-      image,
+      image: imageDetails ? imageDetails.url : undefined,
+      imagePublicId: imageDetails ? imageDetails.publicId : undefined,
       vendor: vendor._id,
     });
 
@@ -63,14 +67,9 @@ const deleteFirmById = async (req, res) => {
       return res.status(404).json({ message: "Firm not found" });
     }
 
-    const imagePath = path.join(__dirname, "../uploads", deletedFirm.image);
-    fs.unlink(imagePath, (err) => {
-      if (err) {
-        console.error("Error while deleting file:", err);
-      } else {
-        console.log("File deleted successfully!");
-      }
-    });
+    if (deletedFirm.imagePublicId) {
+      await deleteImageFromCloudinary(deletedFirm.imagePublicId);
+    }
 
     const vendor = await Vendor.findById(deletedFirm.vendor);
 
@@ -80,24 +79,17 @@ const deleteFirmById = async (req, res) => {
       );
       await vendor.save();
     }
+
     const products = await Product.find({ firm: firmId });
     if (products) {
-      products.forEach((product) => {
-        const productImagePath = path.join(
-          __dirname,
-          "../uploads",
-          product.image
-        );
-        fs.unlink(productImagePath, (err) => {
-          if (err) {
-            console.error("Error while deleting file:", err);
-          } else {
-            console.log("File deleted successfully!");
-          }
-        });
+      products.forEach(async (product) => {
+        if (product.imagePublicId) {
+          await deleteImageFromCloudinary(product.imagePublicId);
+        }
       });
+
+      await Product.deleteMany({ firm: firmId });
     }
-    await Product.deleteMany({ firm: firmId });
 
     return res.status(200).json({ message: "Firm deleted successfully" });
   } catch (error) {

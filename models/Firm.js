@@ -35,6 +35,7 @@ const firmSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  imagePublicId: { type: String },
   vendor: [
     {
       type: mongoose.Schema.Types.ObjectId,
