@@ -3,26 +3,15 @@ const Product = require("../models/Product");
 const Vendor = require("../models/Vendor");
 const multer = require("multer");
 const path = require("path");
-const os = require("os");
 const {
   uploadImageToCloudinary,
   deleteImageFromCloudinary,
 } = require("../cloudinaryService");
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadsDir = path.join(os.tmpdir(), "uploads");
-
-    const fs = require("fs");
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
-    }
-
-    cb(null, uploadsDir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}${path.extname(file.originalname)}`);
-  },
+  destination: (req, file, cb) => cb(null, "uploads/"),
+  filename: (req, file, cb) =>
+    cb(null, `${Date.now()}${path.extname(file.originalname)}`),
 });
 
 const upload = multer({ storage: storage });

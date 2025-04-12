@@ -6,33 +6,18 @@ const vendorRoutes = require("./routes/vendorRoutes");
 const firmRoutes = require("./routes/firmRoutes");
 const productRoutes = require("./routes/productRoutes");
 const cors = require("cors");
-const os = require("os");
 const fs = require("fs");
 const path = require("path");
 
-const uploadsDir = path.join(os.tmpdir(), "uploads");
+const uploadsDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true }); // Create directory if it doesn’t exist
+  fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
 const app = express();
 
 dotEnv.config();
-const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",");;
-
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    methods: "GET,POST,PUT,DELETE,OPTIONS",
-    credentials: true,
-  })
-);
+app.use(cors());
 
 mongoose
   .connect(process.env.MONGO_URI)
