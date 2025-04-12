@@ -6,10 +6,11 @@ const vendorRoutes = require("./routes/vendorRoutes");
 const firmRoutes = require("./routes/firmRoutes");
 const productRoutes = require("./routes/productRoutes");
 const cors = require("cors");
+const os = require("os");
 const fs = require("fs");
 const path = require("path");
 
-const uploadsDir = path.join(__dirname, "uploads");
+const uploadsDir = path.join(os.tmpdir(), "uploads");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true }); // Create directory if it doesn’t exist
 }
